@@ -12,11 +12,15 @@ func (this *ConsulReader) Read() error {
 	panic("implement me")
 }
 
-func (this *ConsulReader) GetWatchFunc() (WatchFunc, error) {
+func (this *ConsulReader) GetWatchFunc() WatchFunc {
 	panic("implement me")
 }
 
 func (this *ConsulReader) Serialize() error {
+	panic("implement me")
+}
+
+func (this *ConsulReader) Deserialize() error {
 	panic("implement me")
 }
 

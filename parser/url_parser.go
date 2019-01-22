@@ -6,6 +6,12 @@ import (
 	"net/url"
 )
 
+const (
+	UrlPrefixFile   = "file"
+	UrlPrefixEtcd   = "etcd"
+	UrlPrefixConsul = "consul"
+)
+
 func Parse(configUrl string) (*url.URL, error) {
 	resultUrl, err := url.Parse(configUrl)
 	if err != nil {
@@ -13,14 +19,14 @@ func Parse(configUrl string) (*url.URL, error) {
 	}
 
 	switch resultUrl.Scheme {
-	case constant.UrlPrefixFile:
-	case constant.UrlPrefixEtcd:
-	case constant.UrlPrefixConsul:
+	case UrlPrefixFile:
+	case UrlPrefixEtcd:
+	case UrlPrefixConsul:
 	default:
 		return nil, errors.New("only support " +
-			constant.UrlPrefixFile + constant.UrlSeparator +
-			constant.UrlPrefixEtcd + constant.UrlSeparator +
-			constant.UrlPrefixConsul + " now")
+			UrlPrefixFile + constant.UrlSeparator +
+			UrlPrefixEtcd + constant.UrlSeparator +
+			UrlPrefixConsul + " now")
 	}
 
 	return resultUrl, nil
