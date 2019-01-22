@@ -1,20 +1,17 @@
 package xviper
 
 import (
-	"github.com/spf13/viper"
-	"github.com/xbox1994/xviper/option"
-	"time"
-)
-
-import (
 	"errors"
 	"fmt"
+	"github.com/spf13/viper"
 	"github.com/xbox1994/xviper/constant"
 	"github.com/xbox1994/xviper/log"
+	"github.com/xbox1994/xviper/option"
 	"github.com/xbox1994/xviper/parser"
 	"github.com/xbox1994/xviper/reader"
 	"github.com/xbox1994/xviper/strategy"
 	"os"
+	"time"
 )
 
 func Init(opt *option.Option) error {
@@ -41,27 +38,8 @@ func Init(opt *option.Option) error {
 		log.Error.Println("init failed")
 		return e
 	}
-	if e = r.Read(); e != nil {
-		switch opt.Strategy.Type {
-		case strategy.Once:
-			log.Error.Println("read failed once with strategy: once, done")
-			return e
-		case strategy.Retry:
-			log.Info.Println("read failed once with strategy: retry, try again")
-			if e = retry(r.Read, opt.Strategy.RetryTimes, opt.Strategy.RetryInterval); e != nil {
-				return e
-			}
-		case strategy.LoadLast:
-			log.Info.Println("read failed once with strategy: loadlast, try again")
-			if e = retry(r.Deserialize, opt.Strategy.RetryTimes, opt.Strategy.RetryInterval); e != nil {
-				return e
-			}
-		default:
-			panic(errors.New("impossible run"))
-		}
-	}
-	if e = r.Serialize(); e != nil {
-		log.Error.Println("serialize failed")
+
+	if e = read(r, opt.Strategy); e != nil {
 		return e
 	}
 
@@ -72,9 +50,11 @@ func Init(opt *option.Option) error {
 		go watchFunc(reread)
 		go func() {
 			for {
-				log.Info.Println("xviper get change, reread")
 				if <-reread == true {
-					r.Read()
+					log.Info.Println("xviper get change, reread")
+					if e = read(r, opt.Strategy); e != nil {
+						continue
+					}
 				}
 			}
 		}()
@@ -97,6 +77,33 @@ func retry(l loadFunc, times int, interval int) error {
 	}
 	if i == times {
 		e := fmt.Errorf("read failed over max retry times %d, done", times)
+		return e
+	}
+	return nil
+}
+
+func read(r reader.Reader, failedStrategy *strategy.ReadFailedStrategy) error {
+	if e := r.Read(); e != nil {
+		switch failedStrategy.Type {
+		case strategy.Once:
+			log.Error.Println("read failed once with strategy: once, done")
+			return e
+		case strategy.Retry:
+			log.Info.Println("read failed once with strategy: retry, try again")
+			if e = retry(r.Read, failedStrategy.RetryTimes, failedStrategy.RetryInterval); e != nil {
+				return e
+			}
+		case strategy.LoadLast:
+			log.Info.Println("read failed once with strategy: loadlast, try again")
+			if e = retry(r.Deserialize, failedStrategy.RetryTimes, failedStrategy.RetryInterval); e != nil {
+				return e
+			}
+		default:
+			panic(errors.New("impossible run"))
+		}
+	}
+	if e := r.Serialize(); e != nil {
+		log.Error.Println("serialize failed")
 		return e
 	}
 	return nil
