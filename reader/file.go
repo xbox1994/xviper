@@ -6,8 +6,8 @@ import (
 	"github.com/spf13/viper"
 	"github.com/xbox1994/xviper/constant"
 	"github.com/xbox1994/xviper/log"
+	"github.com/xbox1994/xviper/parser"
 	"net/url"
-	"os"
 	"path"
 	"strings"
 )
@@ -49,19 +49,9 @@ func (this *FileReader) GetWatchFunc() WatchFunc {
 }
 
 func (this *FileReader) Serialize() error {
-	serializePath := constant.SerializeFolderName + "/file" + this.ConfigUrl.Path
-	dir := path.Dir(serializePath)
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.MkdirAll(dir, 0700)
-	}
-	return viper.WriteConfigAs(serializePath)
+	return Serialize(parser.UrlPrefixFile, this.ConfigUrl.Path)
 }
 
 func (this *FileReader) Deserialize() error {
-	file, e := os.Open(constant.SerializeFolderName + "/file" + this.ConfigUrl.Path)
-	if e != nil {
-		log.Error.Println("deserialize failed, not found file")
-		return e
-	}
-	return viper.ReadConfig(file)
+	return Deserialize(parser.UrlPrefixFile, this.ConfigUrl.Path)
 }

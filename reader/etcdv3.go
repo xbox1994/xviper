@@ -9,10 +9,10 @@ import (
 	_ "github.com/spf13/viper/remote"
 	"github.com/xbox1994/xviper/constant"
 	"github.com/xbox1994/xviper/log"
+	"github.com/xbox1994/xviper/parser"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"net/url"
-	"os"
 	"path"
 	"strings"
 	"time"
@@ -76,19 +76,9 @@ func (this *Etcdv3Reader) GetWatchFunc() WatchFunc {
 }
 
 func (this *Etcdv3Reader) Serialize() error {
-	serializePath := constant.SerializeFolderName + "/etcdv3" + this.ConfigUrl.Path
-	dir := path.Dir(serializePath)
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.MkdirAll(dir, 0700)
-	}
-	return viper.WriteConfigAs(serializePath)
+	return Serialize(parser.UrlPrefixEtcdv3, this.ConfigUrl.Path)
 }
 
 func (this *Etcdv3Reader) Deserialize() error {
-	file, e := os.Open(constant.SerializeFolderName + "/etcdv3" + this.ConfigUrl.Path)
-	if e != nil {
-		log.Error.Println("deserialize failed, not found file")
-		return e
-	}
-	return viper.ReadConfig(file)
+	return Deserialize(parser.UrlPrefixEtcdv3, this.ConfigUrl.Path)
 }
