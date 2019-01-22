@@ -2,6 +2,7 @@ package reader
 
 import (
 	"fmt"
+	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"github.com/xbox1994/xviper/constant"
 	"github.com/xbox1994/xviper/log"
@@ -9,7 +10,6 @@ import (
 	"os"
 	"path"
 	"strings"
-	"time"
 )
 
 type FileReader struct {
@@ -37,16 +37,15 @@ func (this *FileReader) Read() error {
 }
 
 func (this *FileReader) GetWatchFunc() WatchFunc {
-	return func(reread chan bool) {
-		for {
-			reread <- true
-			time.Sleep(5 * time.Second)
-		}
-	}
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		fmt.Println("Config file changed:", e.Name)
+	})
+	return nil
 }
 
 func (this *FileReader) Serialize() error {
-	serializePath := "xviper_local" + this.ConfigUrl.Path
+	serializePath := constant.SerializeFolderName + this.ConfigUrl.Path
 	dir := path.Dir(serializePath)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.MkdirAll(dir, 0700)
@@ -55,7 +54,7 @@ func (this *FileReader) Serialize() error {
 }
 
 func (this *FileReader) Deserialize() error {
-	file, e := os.Open("xviper_local" + this.ConfigUrl.Path)
+	file, e := os.Open(constant.SerializeFolderName + this.ConfigUrl.Path)
 	if e != nil {
 		log.Error.Println("deserialize failed, not found file")
 		return e

@@ -58,12 +58,13 @@ func Init(opt *option.Option) error {
 	}
 
 	reread := make(chan bool)
-	if watchFunc := r.GetWatchFunc(); watchFunc != nil {
-		log.Error.Println("watch func is empty")
+	if watchFunc := r.GetWatchFunc(); watchFunc == nil {
+		log.Info.Println("watch func is empty")
 	} else {
 		go watchFunc(reread)
 		go func() {
 			for {
+				log.Info.Println("engine watch again")
 				if <-reread == true {
 					r.Read()
 				}
@@ -78,7 +79,7 @@ type loadFunc func() error
 
 func retry(l loadFunc, times int, interval int) error {
 	var i int
-	for i = 1; i < times; i ++ {
+	for i = 1; i < times; i++ {
 		time.Sleep(time.Duration(interval) * time.Second)
 		if e := l(); e != nil {
 			log.Info.Println("read failed once, try again")
