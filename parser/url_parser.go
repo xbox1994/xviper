@@ -8,7 +8,7 @@ import (
 
 const (
 	UrlPrefixFile   = "file"
-	UrlPrefixEtcd   = "etcd"
+	UrlPrefixEtcdv3 = "etcdv3"
 	UrlPrefixConsul = "consul"
 )
 
@@ -20,12 +20,12 @@ func Parse(configUrl string) (*url.URL, error) {
 
 	switch resultUrl.Scheme {
 	case UrlPrefixFile:
-	case UrlPrefixEtcd:
+	case UrlPrefixEtcdv3:
 	case UrlPrefixConsul:
 	default:
 		return nil, errors.New("only support " +
 			UrlPrefixFile + constant.UrlSeparator +
-			UrlPrefixEtcd + constant.UrlSeparator +
+			UrlPrefixEtcdv3 + constant.UrlSeparator +
 			UrlPrefixConsul + " now")
 	}
 

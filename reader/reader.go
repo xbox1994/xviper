@@ -1,6 +1,7 @@
 package reader
 
 type Reader interface {
+	Init() error
 	Name() string
 	Read() error
 	GetWatchFunc() WatchFunc

@@ -1,7 +1,13 @@
 package reader
 
-type ConsulReader struct {
+import "net/url"
 
+type ConsulReader struct {
+	ConfigUrl *url.URL
+}
+
+func (this *ConsulReader) Init() error {
+	return nil
 }
 
 func (this *ConsulReader) Name() string {
@@ -23,4 +29,3 @@ func (this *ConsulReader) Serialize() error {
 func (this *ConsulReader) Deserialize() error {
 	panic("implement me")
 }
-

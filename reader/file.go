@@ -16,6 +16,10 @@ type FileReader struct {
 	ConfigUrl *url.URL
 }
 
+func (this *FileReader) Init() error {
+	return nil
+}
+
 func (this *FileReader) Name() string {
 	return "FileReader"
 }
@@ -45,7 +49,7 @@ func (this *FileReader) GetWatchFunc() WatchFunc {
 }
 
 func (this *FileReader) Serialize() error {
-	serializePath := constant.SerializeFolderName + this.ConfigUrl.Path
+	serializePath := constant.SerializeFolderName + "/file" + this.ConfigUrl.Path
 	dir := path.Dir(serializePath)
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.MkdirAll(dir, 0700)
@@ -54,7 +58,7 @@ func (this *FileReader) Serialize() error {
 }
 
 func (this *FileReader) Deserialize() error {
-	file, e := os.Open(constant.SerializeFolderName + this.ConfigUrl.Path)
+	file, e := os.Open(constant.SerializeFolderName + "/file" + this.ConfigUrl.Path)
 	if e != nil {
 		log.Error.Println("deserialize failed, not found file")
 		return e
