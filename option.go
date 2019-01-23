@@ -1,5 +1,6 @@
 package xviper
 
 type Option struct {
-	Strategy *ReadFailedStrategy
+	Strategy  *ReadFailedStrategy
+	ConfigUrl string
 }

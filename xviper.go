@@ -13,7 +13,13 @@ import (
 )
 
 func Init(opt *Option) error {
-	configUrl, e := parser.Parse(os.Getenv(constant.UrlEnvVarName))
+	var configUrlString string
+	if opt.ConfigUrl != "" {
+		configUrlString = opt.ConfigUrl
+	} else {
+		configUrlString = os.Getenv(constant.UrlEnvVarName)
+	}
+	configUrl, e := parser.Parse(configUrlString)
 	if e != nil {
 		log.Error.Println("parse config url failed")
 		return e
