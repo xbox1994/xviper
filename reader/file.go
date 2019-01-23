@@ -42,7 +42,7 @@ func (this *FileReader) Read() error {
 func (this *FileReader) GetWatchFunc() WatchFunc {
 	viper.WatchConfig()
 	viper.OnConfigChange(func(e fsnotify.Event) {
-		fmt.Println("Config file changed:", e.Name)
+		log.Info.Println("Config file changed:", e.Name)
 	})
 	return nil
 }

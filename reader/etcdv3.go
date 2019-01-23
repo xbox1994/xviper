@@ -66,7 +66,7 @@ func (this *Etcdv3Reader) GetWatchFunc() WatchFunc {
 		for watchResp := range watchRespChan {
 			for _, event := range watchResp.Events {
 				if event.Type == mvccpb.PUT {
-					log.Info.Println("config from etcd changed")
+					log.Info.Println("Config etcdv3 changed")
 					reread <- true
 				}
 			}

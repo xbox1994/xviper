@@ -9,6 +9,7 @@ import (
 func main() {
 	// environment variable:
 	// XVIPER_CONFIG_URL=etcdv3://10.13.89.40:2379/config.json
+	// XVIPER_CONFIG_URL=consul://localhost:8500/config.json
 
 	// config.json:
 	// {
