@@ -6,15 +6,13 @@ import (
 	"github.com/spf13/viper"
 	"github.com/xbox1994/xviper/constant"
 	"github.com/xbox1994/xviper/log"
-	"github.com/xbox1994/xviper/option"
 	"github.com/xbox1994/xviper/parser"
 	"github.com/xbox1994/xviper/reader"
-	"github.com/xbox1994/xviper/strategy"
 	"os"
 	"time"
 )
 
-func Init(opt *option.Option) error {
+func Init(opt *Option) error {
 	configUrl, e := parser.Parse(os.Getenv(constant.UrlEnvVarName))
 	if e != nil {
 		log.Error.Println("parse config url failed")
@@ -23,11 +21,11 @@ func Init(opt *option.Option) error {
 
 	var r reader.Reader
 	switch configUrl.Scheme {
-	case parser.UrlPrefixFile:
+	case reader.File:
 		r = &reader.FileReader{ConfigUrl: configUrl}
-	case parser.UrlPrefixEtcdv3:
+	case reader.Etcdv3:
 		r = &reader.Etcdv3Reader{ConfigUrl: configUrl}
-	case parser.UrlPrefixConsul:
+	case reader.Consul:
 		r = &reader.ConsulReader{ConfigUrl: configUrl}
 	default:
 		panic(errors.New("impossible run"))
@@ -82,18 +80,18 @@ func retry(l loadFunc, times int, interval int) error {
 	return nil
 }
 
-func read(r reader.Reader, failedStrategy *strategy.ReadFailedStrategy) error {
+func read(r reader.Reader, failedStrategy *ReadFailedStrategy) error {
 	if e := r.Read(); e != nil {
 		switch failedStrategy.Type {
-		case strategy.Once:
+		case Once:
 			log.Error.Println("read failed once with strategy: once, done")
 			return e
-		case strategy.Retry:
+		case Retry:
 			log.Info.Println("read failed once with strategy: retry, try again")
 			if e = retry(r.Read, failedStrategy.RetryTimes, failedStrategy.RetryInterval); e != nil {
 				return e
 			}
-		case strategy.LoadLast:
+		case LoadLast:
 			log.Info.Println("read failed once with strategy: loadlast, try again")
 			if e = retry(r.Deserialize, failedStrategy.RetryTimes, failedStrategy.RetryInterval); e != nil {
 				return e

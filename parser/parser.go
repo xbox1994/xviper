@@ -3,13 +3,8 @@ package parser
 import (
 	"errors"
 	"github.com/xbox1994/xviper/constant"
+	"github.com/xbox1994/xviper/reader"
 	"net/url"
-)
-
-const (
-	UrlPrefixFile   = "file"
-	UrlPrefixEtcdv3 = "etcdv3"
-	UrlPrefixConsul = "consul"
 )
 
 func Parse(configUrl string) (*url.URL, error) {
@@ -19,14 +14,14 @@ func Parse(configUrl string) (*url.URL, error) {
 	}
 
 	switch resultUrl.Scheme {
-	case UrlPrefixFile:
-	case UrlPrefixEtcdv3:
-	case UrlPrefixConsul:
+	case reader.File:
+	case reader.Etcdv3:
+	case reader.Consul:
 	default:
 		return nil, errors.New("only support " +
-			UrlPrefixFile + constant.UrlSeparator +
-			UrlPrefixEtcdv3 + constant.UrlSeparator +
-			UrlPrefixConsul + " now")
+			reader.File + constant.UrlSeparator +
+			reader.Etcdv3 + constant.UrlSeparator +
+			reader.Consul + " now")
 	}
 
 	return resultUrl, nil

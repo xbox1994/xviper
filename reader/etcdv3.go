@@ -9,7 +9,6 @@ import (
 	_ "github.com/spf13/viper/remote"
 	"github.com/xbox1994/xviper/constant"
 	"github.com/xbox1994/xviper/log"
-	"github.com/xbox1994/xviper/parser"
 	"go.etcd.io/etcd/clientv3"
 	"go.etcd.io/etcd/mvcc/mvccpb"
 	"net/url"
@@ -39,7 +38,7 @@ func (this *Etcdv3Reader) Init() error {
 }
 
 func (this *Etcdv3Reader) Name() string {
-	return "Etcdv3Reader"
+	return Etcdv3
 }
 
 func (this *Etcdv3Reader) Read() error {
@@ -76,9 +75,9 @@ func (this *Etcdv3Reader) GetWatchFunc() WatchFunc {
 }
 
 func (this *Etcdv3Reader) Serialize() error {
-	return Serialize(parser.UrlPrefixEtcdv3, this.ConfigUrl.Path)
+	return Serialize(Etcdv3, this.ConfigUrl.Path)
 }
 
 func (this *Etcdv3Reader) Deserialize() error {
-	return Deserialize(parser.UrlPrefixEtcdv3, this.ConfigUrl.Path)
+	return Deserialize(Etcdv3, this.ConfigUrl.Path)
 }

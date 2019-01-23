@@ -6,7 +6,6 @@ import (
 	"github.com/spf13/viper"
 	"github.com/xbox1994/xviper/constant"
 	"github.com/xbox1994/xviper/log"
-	"github.com/xbox1994/xviper/parser"
 	"net/url"
 	"path"
 	"strings"
@@ -21,7 +20,7 @@ func (this *FileReader) Init() error {
 }
 
 func (this *FileReader) Name() string {
-	return "FileReader"
+	return File
 }
 
 func (this *FileReader) Read() error {
@@ -49,9 +48,9 @@ func (this *FileReader) GetWatchFunc() WatchFunc {
 }
 
 func (this *FileReader) Serialize() error {
-	return Serialize(parser.UrlPrefixFile, this.ConfigUrl.Path)
+	return Serialize(File, this.ConfigUrl.Path)
 }
 
 func (this *FileReader) Deserialize() error {
-	return Deserialize(parser.UrlPrefixFile, this.ConfigUrl.Path)
+	return Deserialize(File, this.ConfigUrl.Path)
 }

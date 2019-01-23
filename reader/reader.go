@@ -8,6 +8,12 @@ import (
 	"path"
 )
 
+const (
+	File   = "file"
+	Etcdv3 = "etcdv3"
+	Consul = "consul"
+)
+
 type Reader interface {
 	Init() error
 	Name() string

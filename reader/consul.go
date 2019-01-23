@@ -11,7 +11,7 @@ func (this *ConsulReader) Init() error {
 }
 
 func (this *ConsulReader) Name() string {
-	panic("implement me")
+	return Consul
 }
 
 func (this *ConsulReader) Read() error {
