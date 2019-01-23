@@ -47,22 +47,26 @@ func Init(opt *Option) error {
 		return e
 	}
 
-	reread := make(chan bool)
-	if watchFunc := r.GetWatchFunc(); watchFunc == nil {
-		log.Info.Println("watch func is empty")
-	} else {
-		go watchFunc(reread)
-		go func() {
-			for {
-				if <-reread == true {
-					log.Info.Println("xviper get change, reread")
-					if e = read(r, opt.Strategy); e != nil {
-						continue
+	if opt.NeedWatch {
+		log.Info.Println("xviper start to watch")
+		reread := make(chan bool)
+		if watchFunc := r.GetWatchFunc(); watchFunc == nil {
+			log.Info.Println("watch func is empty")
+		} else {
+			go watchFunc(reread)
+			go func() {
+				for {
+					if <-reread == true {
+						log.Info.Println("xviper get change, reread")
+						if e = read(r, opt.Strategy); e != nil {
+							continue
+						}
 					}
 				}
-			}
-		}()
+			}()
+		}
 	}
+
 	log.Info.Println("read successfully")
 	return nil
 }
