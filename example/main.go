@@ -23,7 +23,7 @@ func main() {
 		// XVIPER_CONFIG_URL=file://./config/config.json
 		// XVIPER_CONFIG_URL=etcdv3://10.13.89.40:2379/config.json
 		// XVIPER_CONFIG_URL=consul://localhost:8500/config.json
-		ConfigUrl: "etcdv3://10.13.89.40:2379/config.json",
+		ConfigUrl: "consul://localhost:8500/config.json",
 		// watch and reload config automatically if need watch
 		NeedWatch: true,
 	})
@@ -31,6 +31,7 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
+	//xviper.Destroy()
 	for {
 		fmt.Println("Get value from xviper every second for test, you can update config to get latest value: " +
 			xviper.GetString("GIN_MODE"))

@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"context"
 	"github.com/spf13/viper"
 	"github.com/xbox1994/xviper/constant"
 	"github.com/xbox1994/xviper/log"
@@ -18,7 +19,7 @@ type Reader interface {
 	Init() error
 	Name() string
 	Read() error
-	GetWatchFunc() WatchFunc
+	GetWatchFunc(context.Context) WatchFunc
 	Serialize() error
 	Deserialize() error
 }

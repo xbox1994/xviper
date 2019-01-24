@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"context"
 	consulapi "github.com/hashicorp/consul/api"
 	"github.com/hashicorp/consul/watch"
 	"github.com/spf13/viper"
@@ -34,36 +35,42 @@ func (this *ConsulReader) Read() error {
 	return nil
 }
 
-func (this *ConsulReader) GetWatchFunc() WatchFunc {
+func (this *ConsulReader) GetWatchFunc(ctx context.Context) WatchFunc {
 	return func(reread chan bool) {
-		var (
-			err    error
-			params map[string]interface{}
-			plan   *watch.Plan
-		)
-		params = make(map[string]interface{})
-		params["type"] = "key"
-		params["key"] = this.ConfigUrl.Path
-		plan, err = watch.Parse(params)
-		if err != nil {
-			log.Error.Printf("consul watch failed: %s", err)
+		select {
+		case <-ctx.Done():
+			log.Info.Printf("consul watch exit")
 			return
-		}
-		plan.Handler = func(index uint64, result interface{}) {
-			if result == nil {
-				log.Error.Printf("consul watch empty result: %s", err)
+		default:
+			var (
+				err    error
+				params map[string]interface{}
+				plan   *watch.Plan
+			)
+			params = make(map[string]interface{})
+			params["type"] = "key"
+			params["key"] = this.ConfigUrl.Path
+			plan, err = watch.Parse(params)
+			if err != nil {
+				log.Error.Printf("consul watch failed: %s", err)
 				return
 			}
-			v, ok := result.(*consulapi.KVPair)
-			if !ok || v == nil {
-				log.Error.Printf("consul watch invalid result: %s", err)
+			plan.Handler = func(index uint64, result interface{}) {
+				if result == nil {
+					log.Error.Printf("consul watch empty result: %s", err)
+					return
+				}
+				v, ok := result.(*consulapi.KVPair)
+				if !ok || v == nil {
+					log.Error.Printf("consul watch invalid result: %s", err)
+					return
+				}
+				reread <- true
+			}
+			if err = plan.Run(this.ConfigUrl.Host); err != nil {
+				log.Error.Printf("consul watch start failed: %s", err)
 				return
 			}
-			reread <- true
-		}
-		if err = plan.Run(this.ConfigUrl.Host); err != nil {
-			log.Error.Printf("consul watch start failed: %s", err)
-			return
 		}
 	}
 }

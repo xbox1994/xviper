@@ -1,6 +1,7 @@
 package reader
 
 import (
+	"context"
 	"fmt"
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
@@ -39,7 +40,7 @@ func (this *FileReader) Read() error {
 	return nil
 }
 
-func (this *FileReader) GetWatchFunc() WatchFunc {
+func (this *FileReader) GetWatchFunc(ctx context.Context) WatchFunc {
 	viper.WatchConfig()
 	viper.OnConfigChange(func(e fsnotify.Event) {
 		log.Info.Println("Config file changed:", e.Name)

@@ -1,6 +1,7 @@
 package xviper
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/spf13/viper"
@@ -11,6 +12,8 @@ import (
 	"os"
 	"time"
 )
+
+var ctx, cancel = context.WithCancel(context.Background())
 
 func Init(opt *Option) error {
 	var configUrlString string
@@ -50,7 +53,7 @@ func Init(opt *Option) error {
 	if opt.NeedWatch {
 		log.Info.Println("xviper start to watch")
 		reread := make(chan bool)
-		if watchFunc := r.GetWatchFunc(); watchFunc == nil {
+		if watchFunc := r.GetWatchFunc(ctx); watchFunc == nil {
 			log.Info.Println("watch func is empty")
 		} else {
 			go watchFunc(reread)
@@ -69,6 +72,11 @@ func Init(opt *Option) error {
 
 	log.Info.Println("read successfully")
 	return nil
+}
+
+func Destroy() {
+	cancel()
+
 }
 
 type loadFunc func() error

@@ -60,14 +60,20 @@ func (this *Etcdv3Reader) Read() error {
 	return nil
 }
 
-func (this *Etcdv3Reader) GetWatchFunc() WatchFunc {
+func (this *Etcdv3Reader) GetWatchFunc(ctx context.Context) WatchFunc {
 	return func(reread chan bool) {
-		watchRespChan := this.watcher.Watch(context.TODO(), this.ConfigUrl.Path)
-		for watchResp := range watchRespChan {
-			for _, event := range watchResp.Events {
-				if event.Type == mvccpb.PUT {
-					log.Info.Println("Config etcdv3 changed")
-					reread <- true
+		select {
+		case <-ctx.Done():
+			log.Info.Println("etcdv3 watch exit")
+			return
+		default:
+			watchRespChan := this.watcher.Watch(context.TODO(), this.ConfigUrl.Path)
+			for watchResp := range watchRespChan {
+				for _, event := range watchResp.Events {
+					if event.Type == mvccpb.PUT {
+						log.Info.Println("Config etcdv3 changed")
+						reread <- true
+					}
 				}
 			}
 		}
