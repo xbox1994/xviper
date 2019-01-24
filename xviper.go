@@ -59,10 +59,16 @@ func Init(opt *Option) error {
 			go watchFunc(reread)
 			go func() {
 				for {
-					if <-reread == true {
-						log.Info.Println("xviper get change, reread")
-						if e = read(r, opt.Strategy); e != nil {
-							continue
+					select {
+					case <-ctx.Done():
+						log.Info.Println("xviper watcher exit")
+						return
+					default:
+						if <-reread == true {
+							log.Info.Println("xviper get change, reread")
+							if e = read(r, opt.Strategy); e != nil {
+								continue
+							}
 						}
 					}
 				}
@@ -74,9 +80,9 @@ func Init(opt *Option) error {
 	return nil
 }
 
-func Destroy() {
+func Reset() {
 	cancel()
-
+	viper.Reset()
 }
 
 type loadFunc func() error

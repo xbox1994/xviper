@@ -31,7 +31,7 @@ func main() {
 	if e != nil {
 		panic(e)
 	}
-	//xviper.Destroy()
+	xviper.Reset()
 	for {
 		fmt.Println("Get value from xviper every second for test, you can update config to get latest value: " +
 			xviper.GetString("GIN_MODE"))
