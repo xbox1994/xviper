@@ -61,7 +61,7 @@ func (this *Etcdv3Reader) Read() error {
 }
 
 func (this *Etcdv3Reader) GetWatchFunc(ctx context.Context) WatchFunc {
-	return func(reread chan bool) {
+	return func(updatedValue chan string) {
 		select {
 		case <-ctx.Done():
 			log.Info.Println("etcdv3 watch exit")
@@ -72,7 +72,7 @@ func (this *Etcdv3Reader) GetWatchFunc(ctx context.Context) WatchFunc {
 				for _, event := range watchResp.Events {
 					if event.Type == mvccpb.PUT {
 						log.Info.Println("Config etcdv3 changed")
-						reread <- true
+						updatedValue <- string(event.Kv.Value)
 					}
 				}
 			}

@@ -23,9 +23,12 @@ func main() {
 		// XVIPER_CONFIG_URL=file://./config/config.json
 		// XVIPER_CONFIG_URL=etcdv3://10.13.89.40:2379/config.json
 		// XVIPER_CONFIG_URL=consul://localhost:8500/config.json
-		ConfigUrl: "consul://localhost:8500/config.json",
+		ConfigUrl: "etcdv3://10.13.89.40:2379/config.json",
 		// watch and reload config automatically if need watch
 		NeedWatch: true,
+	})
+	xviper.SetRemoteWatchHandler(func(updatedValue string) {
+		fmt.Println("updateValue: " + updatedValue)
 	})
 
 	if e != nil {

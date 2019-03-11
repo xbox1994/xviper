@@ -24,7 +24,7 @@ type Reader interface {
 	Deserialize() error
 }
 
-type WatchFunc func(reread chan bool)
+type WatchFunc func(reread chan string)
 
 func Serialize(readerType string, configPath string) error {
 	serializePath := constant.SerializeFolderName + constant.UrlSeparator + readerType + configPath

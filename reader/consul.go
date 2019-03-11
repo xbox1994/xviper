@@ -36,7 +36,7 @@ func (this *ConsulReader) Read() error {
 }
 
 func (this *ConsulReader) GetWatchFunc(ctx context.Context) WatchFunc {
-	return func(reread chan bool) {
+	return func(updatedValue chan string) {
 		select {
 		case <-ctx.Done():
 			log.Info.Printf("consul watch exit")
@@ -65,7 +65,7 @@ func (this *ConsulReader) GetWatchFunc(ctx context.Context) WatchFunc {
 					log.Error.Printf("consul watch invalid result: %s", err)
 					return
 				}
-				reread <- true
+				updatedValue <- string(v.Value)
 			}
 			if err = plan.Run(this.ConfigUrl.Host); err != nil {
 				log.Error.Printf("consul watch start failed: %s", err)

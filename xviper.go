@@ -9,13 +9,16 @@ import (
 	"github.com/xbox1994/xviper/log"
 	"github.com/xbox1994/xviper/parser"
 	"github.com/xbox1994/xviper/reader"
+	"net/url"
 	"os"
 	"time"
 )
 
 var ctx, cancel = context.WithCancel(context.Background())
+var configUrl *url.URL
+var watcherHandler func(updatedValue string)
 
-func Init(opt *Option) error {
+func parseConfigUrl(opt *Option) (*url.URL, error) {
 	var configUrlString string
 	if opt.ConfigUrl != "" {
 		configUrlString = opt.ConfigUrl
@@ -23,6 +26,15 @@ func Init(opt *Option) error {
 		configUrlString = os.Getenv(constant.UrlEnvVarName)
 	}
 	configUrl, e := parser.Parse(configUrlString)
+	if e != nil {
+		return nil, e
+	}
+	return configUrl, e
+}
+
+func Init(opt *Option) error {
+	var e error
+	configUrl, e = parseConfigUrl(opt)
 	if e != nil {
 		log.Error.Println("parse config url failed")
 		return e
@@ -52,11 +64,11 @@ func Init(opt *Option) error {
 
 	if opt.NeedWatch {
 		log.Info.Println("xviper start to watch")
-		reread := make(chan bool)
+		updatedValue := make(chan string)
 		if watchFunc := r.GetWatchFunc(ctx); watchFunc == nil {
 			log.Info.Println("watch func is empty")
 		} else {
-			go watchFunc(reread)
+			go watchFunc(updatedValue)
 			go func() {
 				for {
 					select {
@@ -64,11 +76,12 @@ func Init(opt *Option) error {
 						log.Info.Println("xviper watcher exit")
 						return
 					default:
-						if <-reread == true {
-							log.Info.Println("xviper get change, reread")
-							if e = read(r, opt.Strategy); e != nil {
-								continue
-							}
+						log.Info.Println("xviper get change")
+						if watcherHandler != nil {
+							watcherHandler(<-updatedValue)
+						}
+						if e = read(r, opt.Strategy); e != nil {
+							continue
 						}
 					}
 				}
@@ -148,3 +161,14 @@ func GetStringMapStringSlice(key string) map[string][]string {
 }
 func GetSizeInBytes(key string) uint { return viper.GetSizeInBytes(key) }
 func GetViper() *viper.Viper         { return viper.GetViper() }
+
+func SetRemoteWatchHandler(handler func(updatedValue string)) error {
+	if configUrl.Scheme == reader.File {
+		return errors.New("WatchRemoteConfig not support file")
+	}
+	if handler == nil {
+		return errors.New("handler is nil")
+	}
+	watcherHandler = handler
+	return nil
+}
