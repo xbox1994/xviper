@@ -75,10 +75,9 @@ func Init(opt *Option) error {
 					case <-ctx.Done():
 						log.Info.Println("xviper watcher exit")
 						return
-					default:
-						log.Info.Println("xviper get change")
+					case v := <-updatedValue:
 						if watcherHandler != nil {
-							watcherHandler(<-updatedValue)
+							watcherHandler(v)
 						}
 						if e = read(r, opt.Strategy); e != nil {
 							continue
